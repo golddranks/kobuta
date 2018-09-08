@@ -1,0 +1,14 @@
+cargo-features = ["edition"]
+
+[package]
+name = "kobuta"
+version = "0.1.0"
+authors = ["Kontio Pyry <pyry.kontio@drasa.eu>"]
+edition = '2018'
+
+[dependencies]
+rand = "0.4"
+structopt = "0.2"
+csv = "1"
+log = "0.4"
+env_logger = "0.5"
