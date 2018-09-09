@@ -64,19 +64,49 @@ Kon's Binary Tables → KoBuTa
 (the u is an artefact of me wanting a name
 that means something in Japanese.
 子豚, kobuta, means a piglet. Cute, huh?)
-
+I'm imagining the file extension to be `something.kbt`
 
 ## Overview
 
-TODO
+TODO: This section will contain a rough description of the file format
 
 ## Live stream
 
-TODO
+TODO: This section will contain links and details of the development live stream
 
 ## Goals / TODO list
 
-TODO
+### Kickstarting the project
+- Prepares sample data in CSV
+- Prepare a project skeleton (error handling, logging, testing, simple command line interface)
+- Prepare a rough overview of the file format
+- Take a 20-minute overview video where I explain the project motivation and the file format overview
+    - In English
+    - In Japanese (?)
+
+### Getting started with the library
+- Implement parsing CSV using the schema
+- Implement writing Float32 and Int32 to file
+- Implement writing & reading metadata
+	- Reading the magic string
+	- Reading the binary start
+	- Parsing the binary
+	- Validating
+	- CRC32 
+	- Implement printing metadata
+- Implement strings
+- TODO
+
+### Advancing the library
+
+- TODO
+
+### Something fun & ambitious for the future
+- A JIT for optimizing data serialization (CSV/JSON)
+- Implement a plugin for MySQL and/or Postgres that
+reads and writes Kobuta directly.
+- Implement an interface for kernels that map/filter/fold
+over the data
 
 ## Specs / Documentation
 
