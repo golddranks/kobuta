@@ -3,7 +3,7 @@
 **Note:** I am live streaming the development of this project! Check out the [details below](#live-stream).
 
 # Kobuta
-##Summary
+## Summary
 
 A binary data serialization format for tabular data that is fast for common use cases, strongly-typed and (reasonably) simple
 
