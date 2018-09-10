@@ -7,8 +7,10 @@ authors = ["Kontio Pyry <pyry.kontio@drasa.eu>"]
 edition = '2018'
 
 [dependencies]
-rand = "0.4"
+rand = "0.5"
 structopt = "0.2"
 csv = "1"
 log = "0.4"
 env_logger = "0.5"
+itoa = "0.4"
+dtoa = "0.4"

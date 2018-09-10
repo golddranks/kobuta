@@ -1,4 +1,4 @@
-use super::Error;
+use super::KbtError;
 use log::{trace, info};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -9,8 +9,8 @@ pub enum DataType {
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Column {
-    dtype: DataType,
-    nullable: bool,
+    pub dtype: DataType,
+    pub nullable: bool,
 }
 
 pub mod literals {
@@ -36,12 +36,12 @@ impl Column {
         }
     }
 
-    fn parse_datatype(string: &str) -> Result<(DataType, &str), Error> {
+    fn parse_datatype(string: &str) -> Result<(DataType, &str), KbtError> {
         (&LIT_TYPES[..]).iter().filter_map(|(literal, datatype)|
                 Column::parse_single_datatype(string, literal, *datatype)
             )
             .find(|_| true)
-            .ok_or(Error)
+            .ok_or(KbtError)
     }
 
     fn parse_nullable(string: &str) -> (bool, &str) {
@@ -52,7 +52,7 @@ impl Column {
         }
     }
 
-    pub fn parse(string: &str) -> Result<(Column, &str), Error> {
+    pub fn parse(string: &str) -> Result<(Column, &str), KbtError> {
 
         let (dtype, leftover) = Column::parse_datatype(string)?;
 
@@ -62,15 +62,15 @@ impl Column {
     }
 }
 
-fn parse_separator(string: &str) -> Result<&str, Error> {
+fn parse_separator(string: &str) -> Result<&str, KbtError> {
     if string.as_bytes()[0] == literals::SEPARATOR {
         Ok(string[1..].trim_left())
     } else {
-        Err(Error)
+        Err(KbtError)
     }
 }
 
-pub fn parse(string: &str) -> Result<Vec<Column>, Error> {
+pub fn parse(string: &str) -> Result<Vec<Column>, KbtError> {
     let mut leftover = string.trim();
     let mut columns = vec![];
 
@@ -139,7 +139,7 @@ mod tests {
 
         for schema_str in INVALID_SCHEMAS {
             info!("Testing {:?}", schema_str);
-            assert_eq!(Err(Error), parse(schema_str));
+            assert_eq!(Err(KbtError), parse(schema_str));
         }
     }
 
