@@ -70,11 +70,17 @@ I'm imagining the file extension to be `something.kbt`
 
 ### Glossary
 **Record** is a like a horizontal row in a CSV files or like a single flat JSON object. It consists of fields of data, each of which belong to a column.
+
 **Column** is like a vertical column in a CSV file. Column has a name and a data type.
+
 **Schema** is piece of metadata that specifies the column names and datatypes.
+
 **File** is the largest unit of Kobuta format. It doesn't need to be an actual file on the disk – it might also be an in-memory representation or a stream. It consists of three sections: metadata section that contains the schema and some other metadata. After that, there is the chunk index section that contains an index of chunks. Finally there is the data section that consists of chunks.
+
 **Chunk** is a big unit of data. It may contain variable number of records. A typical chunk size is around one megabyte. Chunks may be individually compressed. A chunk starts with a block index section, and after that, a block data section.
+
 **Block** is a small unit of data. It contains always 64 records, expect when it's the last block of a chunk when it may contain less. It's always aligned to a 64-byte boundary. A record data inside a block is organized in an sized section and unsized section. The sized section contains all the data that has statically know sizes, such as integers, floats, bools etc. The unsized section contains all the data that is variable-sized, such as strings and bytestrings. The sized section contains offsets of the unsized data fields.
+
 **Stripe** is how sized data is organized in blocks. A stripe is a continuous memory slice of 64 values of the same column. The sized section of a block therefore contains a stripe that has the data of the first column of the 64 records stored in that block, followed by a stripe that has the data of the next column of the 64 records and so on.
 
 ## Live stream
