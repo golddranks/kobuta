@@ -30,11 +30,11 @@ data format that provides this combination:
 
 - Must be especially suitable for tabular data
 - Must be a suitable format for storing, exchanging and processing data
-- Must be suitable for in-memory format
-- Must be high-performance (read speed/modify speed/memory footprint)
-- Must be accessible in a streaming way
-- Must be accessible in random-access way
-- Must be designed in modern hardware in mind (cache layers, SIMD)
+- Must be suitable as an in-memory format
+- Must perform well (read speed/modify speed/memory footprint)
+- Must support streaming access patterns
+- Must support random access patterns
+- Must be designed as modern hardware in mind (cache layers, SIMD)
 - Must be relatively simple
 - Must be strongly typed
 - Must carry the schema with the data
@@ -69,36 +69,87 @@ I'm imagining the file extension to be `something.kbt`
 ## Overview
 
 ### Glossary
-**Record** is a like a horizontal row in a CSV files or like a single flat JSON object. It consists of fields of data, each of which belong to a column.
+**Record** is a like a horizontal row in a CSV files
+or like a single flat JSON object.
+It consists of fields of data,
+each of which belong to a column.
 
-**Column** is like a vertical column in a CSV file. Column has a name and a data type.
+**Column** is like a vertical column in a CSV file.
+Column has a name and a data type.
 
 **Schema** is piece of metadata that specifies the column names and datatypes.
 
-**File** is the largest unit of Kobuta format. It doesn't need to be an actual file on the disk – it might also be an in-memory representation or a stream. It consists of three sections: metadata section that contains the schema and some other metadata. After that, there is the chunk index section that contains an index of chunks. Finally there is the data section that consists of chunks.
+**File** is the largest unit of Kobuta format.
+It doesn't need to be an actual file on the disk –
+it might also be an in-memory representation or a stream.
+It consists of three sections:
+metadata section that contains the schema and some other metadata.
+After that, there is the chunk index section that contains an index of chunks.
+Finally there is the data section that consists of chunks.
 
-**Chunk** is a big unit of data. It may contain variable number of records. A typical chunk size is around one megabyte. Chunks may be individually compressed. A chunk starts with a block index section, and after that, a block data section.
+**Chunk** is a big unit of data.
+It may contain variable number of records.
+A typical chunk size is around one megabyte.
+Chunks may be individually compressed.
+A chunk starts with a block index section,
+and after that, a block data section.
 
-**Block** is a small unit of data. It contains always 64 records, expect when it's the last block of a chunk when it may contain less. It's always aligned to a 64-byte boundary. A record data inside a block is organized in an sized section and unsized section. The sized section contains all the data that has statically know sizes, such as integers, floats, bools etc. The unsized section contains all the data that is variable-sized, such as strings and bytestrings. The sized section contains offsets of the unsized data fields.
+**Block** is a small unit of data.
+It contains always 64 records,
+except when it's the last block of a chunk when it may contain less.
+It's always aligned to a 64-byte boundary.
+A record data inside a block is organized in an sized section and unsized section.
+The sized section contains all the data that has statically know sizes,
+such as integers, floats, bools etc.
+The unsized section contains all the data that is variable-sized,
+such as strings and bytestrings.
+The sized section contains offsets of the unsized data fields.
 
-**Stripe** is how sized data is organized in blocks. A stripe is a continuous memory slice of 64 values of the same column. The sized section of a block therefore contains a stripe that has the data of the first column of the 64 records stored in that block, followed by a stripe that has the data of the next column of the 64 records and so on.
+**Stripe** is how sized data is organized in blocks.
+A stripe is a continuous memory slice of 64 values of the same column.
+The sized section of a block therefore contains a stripe
+that has the data of the first column of the 64 records stored in that block,
+followed by a stripe that has the data of the next column of the 64 records
+and so on.
+
+TODO: What else?
+Overview of supported data types?
+Something around schema?
 
 ## Live stream
 
-TODO: This section will contain links and details of the development live stream
+I will stream the development of this project on Twitch:
+https://www.twitch.tv/golddranks
+
+I have no predefined schedule at the moment,
+but I'm trying to stream twice a week at least;
+one day in English and one day in Japanese.
+
+If you want to get streaming announcements
+(I'll try to post them a few hours in advance),
+follow me in Twitter but beware of shitposting:
+https://twitter.com/GolDDranks
 
 ## Goals / TODO list
 
 ### Kickstarting the project
 - Prepares sample data in CSV
-- Prepare a project skeleton (error handling, logging, testing, simple command line interface)
+- Prepare a project skeleton
+    - error handling
+    - logging
+    - testing
+    - simple command line interface
 - Prepare a rough overview of the file format
-- Take a 20-minute overview video where I explain the project motivation and the file format overview
+    - glossary
+    - about schema
+- Take a 20-minute overview video
+where I explain the project motivation
+and the file format overview
     - In English
-    - In Japanese (?)
+    - In Japanese
 
 ### Getting started with the library
-- Implement parsing CSV using the schema
+- Implement parsing CSV and storing in-memory block using the schema
 - Implement writing Float32 and Int32 to file
 - Implement writing & reading metadata
 	- Reading the magic string
@@ -108,19 +159,24 @@ TODO: This section will contain links and details of the development live stream
 	- CRC32 
 	- Implement printing metadata
 - Implement strings
-- TODO
+- Implement block index
+- Do some performance testing
 
 ### Advancing the library
 
-- TODO
+- Implement conversion to CSV
+- Implement conversion to JSON
+- Implement nullable types
+- Implement chunk index
+- Test compression formats for compressed chunks
+
 
 ### Something fun & ambitious for the future
 - A JIT for optimizing data serialization (CSV/JSON)
-- Implement a plugin for MySQL and/or Postgres that
-reads and writes Kobuta directly.
+- Implement plugins for MySQL, Postgres and SQLite that
+import and export Kobuta directly.
 - Implement an interface for kernels that map/filter/fold
 over the data
-
-## Specs / Documentation
-
-TODO
+- Implement wrappers for C, C++, Java, Go, Python,
+JavaScript, Ruby, R, Julia
+- Write a full spec
