@@ -105,8 +105,9 @@ The unsized section contains all the data that is variable-sized,
 such as strings and bytestrings.
 The sized section contains offsets of the unsized data fields.
 
-**Stripe** is how sized data is organized in blocks.
-A stripe is a continuous memory slice of 64 values of the same column.
+**Stripe** is how sized data is organized inside blocks.
+A stripe is a continuous memory slice of 64 values of the same type,
+beloning to the same column.
 The sized section of a block therefore contains a stripe
 that has the data of the first column of the 64 records stored in that block,
 followed by a stripe that has the data of the next column of the 64 records
@@ -152,6 +153,8 @@ They can be an arbitrary stream of octets.
 
 **TODO:** Defining categories/enums? About sparse representations?
 
+**TODO:** Unums?
+
 Any column can be set to be **Nullable**,
 although this isn't the default.
 In case of nullable data,
@@ -175,7 +178,7 @@ https://twitter.com/GolDDranks
 ## Goals / TODO list
 
 ### Kickstarting the project
-- <s>Prepares sample data in CSV</s>
+- <s>Prepare sample data in CSV</s>
 - <s>Prepare a project skeleton</s>
     - <s>error handling</s>
     - <s>logging</s>
