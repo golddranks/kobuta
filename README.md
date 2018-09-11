@@ -169,7 +169,9 @@ They can be an arbitrary stream of octets.
 
 **TODO:** Inline (sized) binary types?
 
-**TODO:** Defining categories/enums? About sparse representations?
+**TODO:** Defining categories/enums?
+
+**TODO:** About sparse representations?
 
 **TODO:** Unums?
 
@@ -177,7 +179,7 @@ Any column can be set to be **Nullable**,
 although this isn't the default.
 In case of nullable data,
 a separate metadata is kept
-whether a field is null or not. (TODO: Representation? A bit buffer?)
+whether a field is null or not. (**TODO:** Representation? A bit buffer?)
 
 ## Live stream
 
