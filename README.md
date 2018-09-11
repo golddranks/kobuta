@@ -50,7 +50,7 @@ although it isn't actually meant for tabular data.
 Both are text formats,
 which means that they are easily editable in text editor.
 Kobuta is not, and that is the main thing it gives away
-in order to achieve it's other goals.
+in order to achieve its other goals.
 
 There are also multiple existing binary formats such as
 ProtoBuf, Cap'n Proto and FlatBuffers.
@@ -112,9 +112,51 @@ that has the data of the first column of the 64 records stored in that block,
 followed by a stripe that has the data of the next column of the 64 records
 and so on.
 
-TODO: What else?
-Overview of supported data types?
-Something around schema?
+### About schema
+
+Kobuta is strictly typed
+and carries its schema in its metadata section.
+Basically, each column has a name and a type.
+The types have well-defined binary representation.
+Little-endian is used thoroughly.
+Each type is aligned to it's size.
+Here a byte means an octet.
+The basic types are:
+
+**Float128, Float64, Float32, Float16** are
+IEEE 754 floating point formats of type
+binary128, binary64, binary32 and binary16, respectively.
+
+**Int128, Int64, Int32, Int16, Int8** are
+two's complement integers.
+
+**Bool** is identical to Int8
+but with the invariant that that it may only have values
+0 (False) or 1 (True).
+
+**Text64, Text32 and Text16** are
+Int64, Int32 and Int16-backed
+offsets to the unsized section of a block
+that contains all the text data.
+All text must be encoded in valid UTF-8.
+Each of the types have limitations how long a text field they can represent.
+(262144 TiB, 64 MiB, 1024 bytes, respectively.)
+Each text field in the unsized section must end with a zero byte.
+
+**Bin64, Bin32 and Bin16** are
+similar to the Text types,
+but they are not required to be valid UTF-8.
+They can be an arbitrary stream of octets.
+
+**TODO:** Inline (sized) binary types?
+
+**TODO:** Defining categories/enums? About sparse representations?
+
+Any column can be set to be **Nullable**,
+although this isn't the default.
+In case of nullable data,
+a separate metadata is kept
+whether a field is null or not. (TODO: Representation? A bit buffer?)
 
 ## Live stream
 
@@ -127,20 +169,20 @@ one day in English and one day in Japanese.
 
 If you want to get streaming announcements
 (I'll try to post them a few hours in advance),
-follow me in Twitter but beware of shitposting:
+follow me in Twitter:
 https://twitter.com/GolDDranks
 
 ## Goals / TODO list
 
 ### Kickstarting the project
-- Prepares sample data in CSV
-- Prepare a project skeleton
-    - error handling
-    - logging
-    - testing
+- <s>Prepares sample data in CSV</s>
+- <s>Prepare a project skeleton</s>
+    - <s>error handling</s>
+    - <s>logging</s>
+    - <s>testing</s>
     - simple command line interface
 - Prepare a rough overview of the file format
-    - glossary
+    - <s>glossary</s>
     - about schema
 - Take a 20-minute overview video
 where I explain the project motivation
