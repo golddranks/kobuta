@@ -95,6 +95,7 @@ A chunk starts with a block index section,
 and after that, a block data section.
 
 **Block** is a small unit of data.
+It's designed to fit in L1 cache of modern processors.
 It contains always 64 records,
 except when it's the last block of a chunk when it may contain less.
 It's always aligned to a 64-byte boundary.
@@ -112,6 +113,23 @@ The sized section of a block therefore contains a stripe
 that has the data of the first column of the 64 records stored in that block,
 followed by a stripe that has the data of the next column of the 64 records
 and so on.
+
+### About metadata
+
+A Kobuta file starts with metadata.
+The start of the metadata consists of an ASCII magic string that
+provides human-readable info that this file is in Kobuta format.
+Following that is a UTF-8 comment section
+that contains an user-definable file comment comment,
+the amount of records in the file
+and a human-readable version of the schema.
+
+This design allows for peeking the file
+with the `head` command or a text editor.
+
+After the UTF-8 section,
+there is a binary section that contains the actual metadata.
+
 
 ### About schema
 
