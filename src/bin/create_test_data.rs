@@ -1,10 +1,3 @@
-extern crate rand;
-extern crate structopt;
-extern crate kobuta;
-extern crate env_logger;
-extern crate itoa;
-extern crate dtoa;
-
 use std::io::{Write, Error as IoError};
 use std::error::Error;
 
@@ -36,7 +29,7 @@ fn output_csv_field(col: &Column, output: &mut impl Write) -> Result<(), IoError
     use self::DataType::*;
     match col.dtype {
         Float32 => dtoa::write(output, rng.gen::<f32>())?,
-        Int32 => itoa::write(output, rng.gen::<u32>())?,
+        Int32 => itoa::write(output, rng.gen::<i32>())?,
     };
     Ok(())
 }

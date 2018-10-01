@@ -1,10 +1,18 @@
 use super::KbtError;
+use std::error::Error;
+use std::str::FromStr;
 use log::{trace, info};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DataType {
     Float32,
     Int32,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum Data {
+    Float32(f32),
+    Int32(i32),
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -27,6 +35,13 @@ const LIT_TYPES: [(&str, DataType); 2] = [
 ];
 
 impl Column {
+
+    pub fn parse_data(&self, field: &str) -> Result<Data, Box<Error>> {
+        Ok(match self.dtype {
+            DataType::Float32 => Data::Float32(f32::from_str(field)?),
+            DataType::Int32 => Data::Int32(i32::from_str_radix(field, 10)?),
+        })
+    }
 
     fn parse_single_datatype<'a, 'b>(string: &'a str, literal: &str, datatype: DataType) -> Option<(DataType, &'a str)> {
         if string.starts_with(literal) {
