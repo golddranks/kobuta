@@ -6,3 +6,6 @@
 - Why do we need to validate that the input CSV is UTF-8
 if we could just parse an int directly from "ascii-like bytes"?
 Maybe this needs to be made into an optimised library.
+- Code organisation!
+- Decide where to use u32 and where to use u16
+- Add size checks

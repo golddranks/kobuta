@@ -1,12 +1,22 @@
 use super::KbtError;
 use std::error::Error;
 use std::str::FromStr;
+use std::mem;
 use log::{trace, info};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DataType {
     Float32,
     Int32,
+}
+
+impl DataType {
+    pub fn size(&self) -> u16 {
+        (match self {
+            DataType::Int32 => mem::size_of::<i32>(),
+            DataType::Float32 => mem::size_of::<f32>(),
+        } as u16)
+    }
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -34,12 +44,29 @@ const LIT_TYPES: [(&str, DataType); 2] = [
     (literals::INT32, DataType::Int32),
 ];
 
+pub trait Parse {
+    fn parse(bytes: &str) -> Result<Self, KbtError> where Self: Sized; // TODO change the error type AND str parameter
+}
+
+impl Parse for i32 {
+    fn parse(bytes: &str) -> Result<i32, KbtError> {
+        i32::from_str_radix(bytes, 10).map_err(|_| KbtError)
+    }
+}
+
+impl Parse for f32 {
+    fn parse(bytes: &str) -> Result<f32, KbtError> {
+        f32::from_str(bytes).map_err(|_| KbtError)
+    }
+}
+
+
 impl Column {
 
     pub fn parse_data(&self, field: &str) -> Result<Data, Box<Error>> {
         Ok(match self.dtype {
-            DataType::Float32 => Data::Float32(f32::from_str(field)?),
-            DataType::Int32 => Data::Int32(i32::from_str_radix(field, 10)?),
+            DataType::Float32 => Data::Float32(f32::parse(field)?),
+            DataType::Int32 => Data::Int32(i32::parse(field)?),
         })
     }
 
