@@ -9,3 +9,7 @@ Maybe this needs to be made into an optimised library.
 - Code organisation!
 - Decide where to use u32 and where to use u16
 - Add size checks
+
+- 標準ライブラリのフォーマット昨日とitoaやdtoaの
+フォーマット昨日をベンチマークする
+- WriteやReadを使用するか、APIでスライスを渡すか、検討する

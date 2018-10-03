@@ -45,18 +45,36 @@ const LIT_TYPES: [(&str, DataType); 2] = [
 ];
 
 pub trait Parse {
-    fn parse(bytes: &str) -> Result<Self, KbtError> where Self: Sized; // TODO change the error type AND str parameter
+    // TODO change the error type AND str parameter
+    fn parse(bytes: &str) -> Result<Self, KbtError> where Self: Sized;
+    fn write<'o>(&self, output: &'o mut [u8]) -> Result<&'o mut [u8], KbtError>;
 }
 
 impl Parse for i32 {
     fn parse(bytes: &str) -> Result<i32, KbtError> {
         i32::from_str_radix(bytes, 10).map_err(|_| KbtError)
     }
+
+    fn write<'o>(&self, output: &'o mut [u8]) -> Result<&'o mut [u8], KbtError> {
+        // TODO change the error type
+        let bytes =
+            itoa::write(&mut *output, *self).map_err(|_| KbtError)?;
+        let remainder = &mut output[bytes..];
+        Ok(remainder)
+    }
 }
 
 impl Parse for f32 {
     fn parse(bytes: &str) -> Result<f32, KbtError> {
         f32::from_str(bytes).map_err(|_| KbtError)
+    }
+
+    fn write<'o>(&self, output: &'o mut [u8]) -> Result<&'o mut [u8], KbtError> {
+        // TODO change the error type
+        let bytes = dtoa::write(&mut *output, *self).map_err(|_| KbtError)?;
+
+        let remainder = &mut output[bytes..];
+        Ok(remainder)
     }
 }
 

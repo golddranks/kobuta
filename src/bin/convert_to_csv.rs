@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fs;
+use std::io::Write;
 
 use structopt::StructOpt;
 
@@ -21,13 +22,18 @@ fn main() -> Result<(), Box<Error>> {
 
     let opt = Opt::from_args();
 
-    let csv = fs::read(&opt.input)?;
+    //let kbt = fs::File::open(&opt.input)?;
+    let kbt = fs::read(&opt.input)?;
+
+    println!("KBT: {:?}", &kbt[..100]);
+
     let schema = kobuta::schema::parse(&opt.schema)?;
-    let mut output = vec![0; 5 * 1024 * 1024];
 
-    kobuta::parse_csv(csv.as_slice(), &schema, &mut output)?;
+    let mut output = vec![0; 500000]; // TODO fix this
 
-    fs::write(opt.output, &output)?;
+    kobuta::covert_to_csv(kbt.as_slice(), &mut output, &schema)?;
+
+    fs::write(&opt.output, output)?;
 
     println!("Done.");
 

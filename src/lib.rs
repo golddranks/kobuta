@@ -1,7 +1,7 @@
 use std::error::Error;
 use std::fmt;
 use std::mem;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::slice;
 use log::debug;
 
@@ -127,6 +127,34 @@ pub fn parse_csv(reader: impl Read, schema: &[schema::Column], output: &mut [u8]
                 }
             }
         }
+    }
+
+    Ok(())
+}
+
+pub fn covert_to_csv(mut input: impl Read, mut output: &mut [u8], schema: &[schema::Column]) -> Result<(), KbtError> {
+
+    let block_size = calc_sized_partition_size(schema);
+
+    let mut block = vec![0; block_size as usize];
+
+    input.read_exact(&mut block).map_err(|_| KbtError)?; // TODO do error handling
+
+    let mut stripes = partition(&mut block, schema);
+
+    let mut rownum = 0;
+
+    for (i, stripe) in stripes.iter().enumerate() {
+
+        output = match stripe {
+            Stripe::Int32(array) => {
+                debug!("Int32 slice: {:?}", &array[..]);
+                array[rownum].write(output)?
+            },
+            Stripe::Float32(array) => array[rownum].write(output)?,
+        };
+        output[0] = b',';
+        output = &mut output[1..];
     }
 
     Ok(())
