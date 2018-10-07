@@ -23,3 +23,16 @@
 - We need to think about the input/output abstractions more
 - The output is now capped only to the amount of data actually written
 (before it would write out the whole fixed-size buffer)
+
+# 2018年10月7日 5回目
+- 何ブロックでもKBTからCSVに変換できるようになった！
+- そのおかげでCSVからKBTに変換している局面で最後のブロックに
+むだな0.0があるのが明らかになっている
+    - ここはチャンクレベルのメタデータがあればなおせる
+
+## The fifth round
+- Now able to convert multi-block KBT to CSV
+- Because of that, it became clear that the CSV -> KBT
+  conversion leaves the final block partially full
+  of zeros
+    - We can fix that once we have support for chunk-level metadata

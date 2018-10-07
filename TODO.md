@@ -13,3 +13,8 @@ Maybe this needs to be made into an optimised library.
 - 標準ライブラリのフォーマット昨日とitoaやdtoaの
 フォーマット昨日をベンチマークする
 - WriteやReadを使用するか、APIでスライスを渡すか、検討する
+
+
+- chunk level metadata
+- codebase cleaning
+- block/chunk size calculation module

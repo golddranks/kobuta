@@ -25,11 +25,9 @@ fn main() -> Result<(), Box<Error>> {
     //let kbt = fs::File::open(&opt.input)?;
     let kbt = fs::read(&opt.input)?;
 
-    println!("KBT: {:?}", &kbt[..100]);
-
     let schema = kobuta::schema::parse(&opt.schema)?;
 
-    let mut output_buff = vec![0; 500000]; // TODO fix this
+    let mut output_buff = vec![0; 10 * 1024 * 1024]; // TODO fix this
 
     let output = kobuta::covert_to_csv(kbt.as_slice(), &mut output_buff, &schema)?;
 

@@ -1,9 +1,9 @@
 use std::error::Error;
 use std::fmt;
 use std::mem;
-use std::io::{Read, Write};
+use std::io::{Read, Write, ErrorKind as IoErrorKind};
 use std::slice;
-use log::debug;
+use log::{debug, trace};
 
 pub mod schema; // TODO check if we need this mod clause in Rust 2018
 
@@ -140,15 +140,9 @@ pub fn parse_csv<'o>(reader: impl Read, schema: &[schema::Column], output: &'o m
     Ok(&output[..blocknum*block_size])
 }
 
-pub fn covert_to_csv<'o>(mut input: impl Read, output: &'o mut [u8], schema: &[schema::Column]) -> Result<&'o [u8], KbtError> {
+fn block_to_csv<'o>(block_buff: &mut [u8], output: &'o mut [u8], schema: &[schema::Column]) -> Result<(&'o [u8], &'o mut [u8]), KbtError> {
 
-    let block_size = calc_sized_partition_size(schema);
-
-    let mut block = vec![0; block_size as usize];
-
-    input.read_exact(&mut block).map_err(|_| KbtError)?; // TODO do error handling
-
-    let mut stripes = partition(&mut block, schema);
+    let mut stripes = partition(block_buff, schema);
 
     let mut block_output = &mut *output;
 
@@ -166,7 +160,7 @@ pub fn covert_to_csv<'o>(mut input: impl Read, output: &'o mut [u8], schema: &[s
 
             let (bytes_written, slice_left) = match stripe {
                 Stripe::Int32(array) => {
-                    debug!("Int32 slice: {:?}", &array[..]);
+                    trace!("Int32 slice: {:?}", &array[..]);
                     array[rownum as usize].write(block_output)?
                 },
                 Stripe::Float32(array) => array[rownum as usize].write(block_output)?,
@@ -182,7 +176,7 @@ pub fn covert_to_csv<'o>(mut input: impl Read, output: &'o mut [u8], schema: &[s
         }
         let (bytes_written, slice_left) = match last_stripe {
             Stripe::Int32(array) => {
-                debug!("Int32 slice: {:?}", &array[..]);
+                trace!("Int32 slice: {:?}", &array[..]);
                 array[rownum as usize].write(block_output)?
             },
             Stripe::Float32(array) => array[rownum as usize].write(block_output)?,
@@ -194,6 +188,41 @@ pub fn covert_to_csv<'o>(mut input: impl Read, output: &'o mut [u8], schema: &[s
         block_output[0] = b'\n';
         output_consumed += 1;
         block_output = &mut block_output[1..];
+    }
+
+    let (output, output_left) = output.split_at_mut(output_consumed);
+
+    Ok((&*output, output_left))
+}
+
+pub fn covert_to_csv<'o>(mut input: impl Read, output: &'o mut [u8], schema: &[schema::Column]) -> Result<&'o [u8], KbtError> {
+
+    let block_size = calc_sized_partition_size(schema);
+
+    let mut block_buff = vec![0; block_size as usize];
+
+    let mut output_consumed = 0;
+
+    let mut output_left = &mut *output;
+
+    loop {
+        debug!("");
+        match &input.read_exact(&mut block_buff) {
+            Ok(()) => (),
+            Err(err) if err.kind() == IoErrorKind::UnexpectedEof => {
+                debug!("UnexpectedEof");
+                break;
+            },
+            Err(err) => {
+                debug!("read_exact: {:?}", err);
+                return Err(KbtError);
+            },
+        }
+        let (output, output_left_temp) = block_to_csv(&mut block_buff, output_left, schema)?;
+
+        output_left = output_left_temp;
+
+        output_consumed += output.len()
     }
 
     Ok(&output[..output_consumed])
