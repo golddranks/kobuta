@@ -104,17 +104,19 @@ fn write_val<T>(block: &mut [u8], schema: &[schema::Column], col: u32, row: u32,
     };
 }
 
-pub fn parse_csv(reader: impl Read, schema: &[schema::Column], output: &mut [u8]) -> Result<(), Box<Error>> {
-
-    let mut csv_reader = csv::Reader::from_reader(reader);
+pub fn parse_csv<'o>(reader: impl Read, schema: &[schema::Column], output: &'o mut [u8], has_headers: bool) -> Result<&'o [u8], Box<Error>> {
+    let mut csv_reader = csv::ReaderBuilder::new().has_headers(has_headers).from_reader(reader);
+    let mut records = &mut csv_reader.records().peekable();
 
     let block_size = calc_sized_partition_size(schema) as usize;
+
+    let mut blocknum = 0;
 
     for block in output.chunks_mut(block_size) {
 
         let mut stripes = partition(block, schema);
 
-        for (rownum, rec) in csv_reader.records().enumerate().take(STRIPE_SIZE as usize) {
+        for (rownum, rec) in records.enumerate().take(STRIPE_SIZE as usize) {
 
             let rec = rec?;
 
@@ -127,12 +129,18 @@ pub fn parse_csv(reader: impl Read, schema: &[schema::Column], output: &mut [u8]
                 }
             }
         }
+
+        blocknum += 1;
+
+        if records.peek().is_none() {
+            break;
+        }
     }
 
-    Ok(())
+    Ok(&output[..blocknum*block_size])
 }
 
-pub fn covert_to_csv(mut input: impl Read, mut output: &mut [u8], schema: &[schema::Column]) -> Result<(), KbtError> {
+pub fn covert_to_csv<'o>(mut input: impl Read, output: &'o mut [u8], schema: &[schema::Column]) -> Result<&'o [u8], KbtError> {
 
     let block_size = calc_sized_partition_size(schema);
 
@@ -142,20 +150,51 @@ pub fn covert_to_csv(mut input: impl Read, mut output: &mut [u8], schema: &[sche
 
     let mut stripes = partition(&mut block, schema);
 
-    let mut rownum = 0;
+    let mut block_output = &mut *output;
 
-    for (i, stripe) in stripes.iter().enumerate() {
+    let mut output_consumed = 0;
 
-        output = match stripe {
+    for rownum in 0..STRIPE_SIZE {
+
+        let (last_stripe, stripes) = if let Some(stripes) = stripes.split_last_mut() {
+            stripes
+        } else {
+            break;
+        };
+
+        for (i, stripe) in stripes.iter().enumerate() {
+
+            let (bytes_written, slice_left) = match stripe {
+                Stripe::Int32(array) => {
+                    debug!("Int32 slice: {:?}", &array[..]);
+                    array[rownum as usize].write(block_output)?
+                },
+                Stripe::Float32(array) => array[rownum as usize].write(block_output)?,
+            };
+
+            output_consumed += bytes_written;
+            block_output = slice_left;
+
+            block_output[0] = b',';
+            output_consumed += 1;
+            block_output = &mut block_output[1..];
+
+        }
+        let (bytes_written, slice_left) = match last_stripe {
             Stripe::Int32(array) => {
                 debug!("Int32 slice: {:?}", &array[..]);
-                array[rownum].write(output)?
+                array[rownum as usize].write(block_output)?
             },
-            Stripe::Float32(array) => array[rownum].write(output)?,
+            Stripe::Float32(array) => array[rownum as usize].write(block_output)?,
         };
-        output[0] = b',';
-        output = &mut output[1..];
+
+        output_consumed += bytes_written;
+        block_output = slice_left;
+
+        block_output[0] = b'\n';
+        output_consumed += 1;
+        block_output = &mut block_output[1..];
     }
 
-    Ok(())
+    Ok(&output[..output_consumed])
 }

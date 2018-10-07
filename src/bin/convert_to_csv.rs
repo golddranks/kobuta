@@ -29,9 +29,9 @@ fn main() -> Result<(), Box<Error>> {
 
     let schema = kobuta::schema::parse(&opt.schema)?;
 
-    let mut output = vec![0; 500000]; // TODO fix this
+    let mut output_buff = vec![0; 500000]; // TODO fix this
 
-    kobuta::covert_to_csv(kbt.as_slice(), &mut output, &schema)?;
+    let output = kobuta::covert_to_csv(kbt.as_slice(), &mut output_buff, &schema)?;
 
     fs::write(&opt.output, output)?;
 
