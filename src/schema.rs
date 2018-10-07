@@ -1,29 +1,19 @@
-use super::KbtError;
+
+use std::{
+    mem,
+    error::Error,
+    str::FromStr
+};
+
 use log::{info, trace};
-use std::error::Error;
-use std::mem;
-use std::str::FromStr;
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum DataType {
-    Float32,
-    Int32,
-}
-
-impl DataType {
-    pub fn size(&self) -> u16 {
-        (match self {
-            DataType::Int32 => mem::size_of::<i32>(),
-            DataType::Float32 => mem::size_of::<f32>(),
-        } as u16)
-    }
-}
-
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub enum Data {
-    Float32(f32),
-    Int32(i32),
-}
+use crate::{
+    errors::KbtError,
+    types::{
+        DataType,
+        Data
+    },
+};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct Column {
@@ -44,49 +34,7 @@ const LIT_TYPES: [(&str, DataType); 2] = [
     (literals::INT32, DataType::Int32),
 ];
 
-pub trait Parse {
-    // TODO change the error type AND str parameter
-    fn parse(bytes: &str) -> Result<Self, KbtError>
-    where
-        Self: Sized;
-    fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError>;
-}
-
-impl Parse for i32 {
-    fn parse(bytes: &str) -> Result<i32, KbtError> {
-        i32::from_str_radix(bytes, 10).map_err(|_| KbtError)
-    }
-
-    fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError> {
-        // TODO change the error type
-        let bytes = itoa::write(&mut *output, *self).map_err(|_| KbtError)?;
-        let remainder = &mut output[bytes..];
-        Ok((bytes, remainder))
-    }
-}
-
-impl Parse for f32 {
-    fn parse(bytes: &str) -> Result<f32, KbtError> {
-        f32::from_str(bytes).map_err(|_| KbtError)
-    }
-
-    fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError> {
-        // TODO change the error type
-        let bytes = dtoa::write(&mut *output, *self).map_err(|_| KbtError)?;
-
-        let remainder = &mut output[bytes..];
-        Ok((bytes, remainder))
-    }
-}
-
 impl Column {
-    pub fn parse_data(&self, field: &str) -> Result<Data, Box<Error>> {
-        Ok(match self.dtype {
-            DataType::Float32 => Data::Float32(f32::parse(field)?),
-            DataType::Int32 => Data::Int32(i32::parse(field)?),
-        })
-    }
-
     fn parse_single_datatype<'a, 'b>(
         string: &'a str,
         literal: &str,

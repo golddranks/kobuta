@@ -1,10 +1,15 @@
-use std::error::Error;
-use std::io::{Error as IoError, Write};
+use std::{
+    error::Error,
+    io::{Error as IoError, Write},
+};
 
 use rand::Rng;
 use structopt::StructOpt;
 
-use kobuta::schema::{Column, DataType};
+use kobuta::{
+    schema::Column,
+    types::DataType,
+};
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "basic")]
@@ -30,6 +35,7 @@ fn output_csv_field(col: &Column, output: &mut impl Write) -> Result<(), IoError
     match col.dtype {
         Float32 => dtoa::write(output, rng.gen::<f32>())?,
         Int32 => itoa::write(output, rng.gen::<i32>())?,
+        _ => unimplemented!(), // TODO
     };
     Ok(())
 }

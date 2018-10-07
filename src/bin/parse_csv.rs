@@ -28,7 +28,7 @@ fn main() -> Result<(), Box<Error>> {
     let schema = kobuta::schema::parse(&opt.schema)?;
     let mut output_buff = vec![0; 5 * 1024 * 1024];
 
-    let output = kobuta::parse_csv(csv.as_slice(), &schema, &mut output_buff, opt.has_headers)?;
+    let output = kobuta::csv::to_kbt(csv.as_slice(), &schema, &mut output_buff, opt.has_headers)?;
 
     fs::write(opt.output, &output)?;
 
