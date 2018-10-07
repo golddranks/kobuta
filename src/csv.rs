@@ -1,4 +1,8 @@
-use std::io::Read;
+use std::{
+    io::Read,
+    str::{FromStr, from_utf8},
+
+};
 
 use crate::{
     block,
@@ -20,6 +24,14 @@ impl Fmt for Csv {
         unimplemented!()
     }
 
+    fn parse_int32(val: &[u8]) -> Result<Int32, KbtError> {
+        i32::from_str_radix(from_utf8(val).map_err(|_| KbtError)?, 10).map_err(|_| KbtError)
+    }
+
+    fn parse_float32(val: &[u8]) -> Result<Float32, KbtError> {
+        f32::from_str(from_utf8(val).map_err(|_| KbtError)?).map_err(|_| KbtError)
+    }
+
     fn print_int8(val: Int8, output: &mut [u8]) -> Result<usize, KbtError> {
         unimplemented!()
     }
@@ -27,46 +39,16 @@ impl Fmt for Csv {
     fn print_int16(val: Int16, output: &mut [u8]) -> Result<usize, KbtError> {
         unimplemented!()
     }
-}
 
-
-// TODO unused - replaced by formats.rs Fmt trait
-/*
-pub trait Parse {
-    // TODO change the error type AND str parameter
-    fn parse(bytes: &str) -> Result<Self, KbtError>
-        where
-            Self: Sized;
-    fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError>;
-}
-
-impl Parse for i32 {
-    fn parse(bytes: &str) -> Result<i32, KbtError> {
-        i32::from_str_radix(bytes, 10).map_err(|_| KbtError)
+    fn print_int32(val: Int32, output: &mut [u8]) -> Result<usize, KbtError> {
+        itoa::write(&mut *output, val).map_err(|_| KbtError)
     }
 
-    fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError> {
-        // TODO change the error type
-        let bytes = itoa::write(&mut *output, *self).map_err(|_| KbtError)?;
-        let remainder = &mut output[bytes..];
-        Ok((bytes, remainder))
+    fn print_float32(val: Float32, output: &mut [u8]) -> Result<usize, KbtError> {
+        dtoa::write(&mut *output, val).map_err(|_| KbtError)
     }
 }
 
-impl Parse for f32 {
-    fn parse(bytes: &str) -> Result<f32, KbtError> {
-        f32::from_str(bytes).map_err(|_| KbtError)
-    }
-
-    fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError> {
-        // TODO change the error type
-        let bytes = dtoa::write(&mut *output, *self).map_err(|_| KbtError)?;
-
-        let remainder = &mut output[bytes..];
-        Ok((bytes, remainder))
-    }
-}
-*/
 
 pub fn to_kbt<'o>(
     reader: impl Read,

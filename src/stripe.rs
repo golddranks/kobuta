@@ -84,6 +84,8 @@ impl<'a> Ref<'a> {
         Ok(match self {
             Ref::Int8(stripe) => F::print_int8(stripe.arr()[rownum], output)?,
             Ref::Int16(stripe) => F::print_int16(stripe.arr()[rownum], output)?,
+            Ref::Int32(stripe) => F::print_int32(stripe.arr()[rownum], output)?,
+            Ref::Float32(stripe) => F::print_float32(stripe.arr()[rownum], output)?,
             _ => unimplemented!(),
         })
     }
@@ -115,6 +117,8 @@ impl<'a> Mut<'a> {
         match self {
             Mut::Int8(stripe) => stripe.arr_mut()[rownum] = F::parse_int8(val)?,
             Mut::Int16(stripe) => stripe.arr_mut()[rownum] = F::parse_int16(val)?,
+            Mut::Int32(stripe) => stripe.arr_mut()[rownum] = F::parse_int32(val)?,
+            Mut::Float32(stripe) => stripe.arr_mut()[rownum] = F::parse_float32(val)?,
             _ => unimplemented!(),
         };
 
