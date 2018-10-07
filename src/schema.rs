@@ -1,8 +1,8 @@
 use super::KbtError;
+use log::{info, trace};
 use std::error::Error;
-use std::str::FromStr;
 use std::mem;
-use log::{trace, info};
+use std::str::FromStr;
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DataType {
@@ -46,7 +46,9 @@ const LIT_TYPES: [(&str, DataType); 2] = [
 
 pub trait Parse {
     // TODO change the error type AND str parameter
-    fn parse(bytes: &str) -> Result<Self, KbtError> where Self: Sized;
+    fn parse(bytes: &str) -> Result<Self, KbtError>
+    where
+        Self: Sized;
     fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError>;
 }
 
@@ -57,8 +59,7 @@ impl Parse for i32 {
 
     fn write<'o>(&self, output: &'o mut [u8]) -> Result<(usize, &'o mut [u8]), KbtError> {
         // TODO change the error type
-        let bytes =
-            itoa::write(&mut *output, *self).map_err(|_| KbtError)?;
+        let bytes = itoa::write(&mut *output, *self).map_err(|_| KbtError)?;
         let remainder = &mut output[bytes..];
         Ok((bytes, remainder))
     }
@@ -78,9 +79,7 @@ impl Parse for f32 {
     }
 }
 
-
 impl Column {
-
     pub fn parse_data(&self, field: &str) -> Result<Data, Box<Error>> {
         Ok(match self.dtype {
             DataType::Float32 => Data::Float32(f32::parse(field)?),
@@ -88,7 +87,11 @@ impl Column {
         })
     }
 
-    fn parse_single_datatype<'a, 'b>(string: &'a str, literal: &str, datatype: DataType) -> Option<(DataType, &'a str)> {
+    fn parse_single_datatype<'a, 'b>(
+        string: &'a str,
+        literal: &str,
+        datatype: DataType,
+    ) -> Option<(DataType, &'a str)> {
         if string.starts_with(literal) {
             Some((datatype, string[literal.len()..].trim_left()))
         } else {
@@ -97,10 +100,11 @@ impl Column {
     }
 
     fn parse_datatype(string: &str) -> Result<(DataType, &str), KbtError> {
-        (&LIT_TYPES[..]).iter().filter_map(|(literal, datatype)|
+        (&LIT_TYPES[..])
+            .iter()
+            .filter_map(|(literal, datatype)| {
                 Column::parse_single_datatype(string, literal, *datatype)
-            )
-            .find(|_| true)
+            }).find(|_| true)
             .ok_or(KbtError)
     }
 
@@ -113,7 +117,6 @@ impl Column {
     }
 
     pub fn parse(string: &str) -> Result<(Column, &str), KbtError> {
-
         let (dtype, leftover) = Column::parse_datatype(string)?;
 
         let (nullable, leftover) = Column::parse_nullable(leftover);
@@ -140,7 +143,9 @@ pub fn parse(string: &str) -> Result<Vec<Column>, KbtError> {
         trace!("result: {:?}", result);
         columns.push(result.0);
 
-        if result.1.is_empty() { break };
+        if result.1.is_empty() {
+            break;
+        };
 
         leftover = parse_separator(result.1)?;
     }
@@ -148,34 +153,59 @@ pub fn parse(string: &str) -> Result<Vec<Column>, KbtError> {
     Ok(columns)
 }
 
-
 #[cfg(test)]
 mod tests {
     extern crate env_logger;
     use super::*;
 
-    const VALID_SCHEMAS: &[(&str, &[Column])] =
-        &[
-            ("Float32 Nullable, Int32, Float32", &[
-                Column{ dtype: DataType::Float32, nullable: true },
-                Column{ dtype: DataType::Int32, nullable: false },
-                Column{ dtype: DataType::Float32, nullable: false }
-            ]),
-            ("Float32", &[
-                Column{ dtype: DataType::Float32, nullable: false }
-            ]),
-            (   "Float32   ", &[
-                Column{ dtype: DataType::Float32, nullable: false }
-            ]),
-            (   "  Int32   Nullable", &[
-                Column{ dtype: DataType::Int32, nullable: true }
-            ]),
-        ];
+    const VALID_SCHEMAS: &[(&str, &[Column])] = &[
+        (
+            "Float32 Nullable, Int32, Float32",
+            &[
+                Column {
+                    dtype: DataType::Float32,
+                    nullable: true,
+                },
+                Column {
+                    dtype: DataType::Int32,
+                    nullable: false,
+                },
+                Column {
+                    dtype: DataType::Float32,
+                    nullable: false,
+                },
+            ],
+        ),
+        (
+            "Float32",
+            &[Column {
+                dtype: DataType::Float32,
+                nullable: false,
+            }],
+        ),
+        (
+            "Float32   ",
+            &[Column {
+                dtype: DataType::Float32,
+                nullable: false,
+            }],
+        ),
+        (
+            "  Int32   Nullable",
+            &[Column {
+                dtype: DataType::Int32,
+                nullable: true,
+            }],
+        ),
+    ];
 
     #[test]
     fn test_parse_happy_path() {
         env_logger::try_init();
-        info!("Starting test_parse_happy_path. {} test cases available.", VALID_SCHEMAS.len());
+        info!(
+            "Starting test_parse_happy_path. {} test cases available.",
+            VALID_SCHEMAS.len()
+        );
 
         for (schema_str, expected_schema) in VALID_SCHEMAS {
             info!("Testing {:?}", schema_str);
@@ -195,7 +225,10 @@ mod tests {
     #[test]
     fn test_parse_error_path() {
         env_logger::try_init();
-        info!("Starting test_parse_error_path. {} test cases available.", INVALID_SCHEMAS.len());
+        info!(
+            "Starting test_parse_error_path. {} test cases available.",
+            INVALID_SCHEMAS.len()
+        );
 
         for schema_str in INVALID_SCHEMAS {
             info!("Testing {:?}", schema_str);
@@ -204,5 +237,3 @@ mod tests {
     }
 
 }
-
-

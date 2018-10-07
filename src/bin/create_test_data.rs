@@ -1,5 +1,5 @@
-use std::io::{Write, Error as IoError};
 use std::error::Error;
+use std::io::{Error as IoError, Write};
 
 use rand::Rng;
 use structopt::StructOpt;
@@ -35,7 +35,7 @@ fn output_csv_field(col: &Column, output: &mut impl Write) -> Result<(), IoError
 }
 
 fn output_csv_row(schema: &[Column], output: &mut impl Write) -> Result<(), IoError> {
-    let last_col_idx = schema.len()-1;
+    let last_col_idx = schema.len() - 1;
     for col in &schema[0..last_col_idx] {
         output_csv_field(col, output)?;
         output.write(b",")?;
