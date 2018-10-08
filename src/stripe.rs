@@ -1,8 +1,8 @@
-use std::mem;
+use std::mem::size_of;
 
 use crate::{errors::KbtError, formats::Fmt, schema, types, types::*};
 
-const BITMASK_ALIGN_64: usize = ((1 << 6) - 1);
+pub const STRIPE_ALIGNMENT: usize = 64;
 pub const STRIPE_SIZE: usize = 64;
 
 /// Returns a stripe size in bytes
@@ -17,9 +17,13 @@ fn calc_offset(schema: &[schema::Column], col: u32) -> u32 {
         .fold(0, |acc_offset, col| acc_offset + size(&col.dtype) as u32)
 }
 
+fn is_aligned_at(bytes: &[u8], alignment: usize) -> bool {
+    ((bytes.as_ptr() as usize) & (alignment-1)) == 0
+}
+
 fn slice_ok<T>(bytes: &[u8]) -> bool {
-    bytes.len() == mem::size_of::<Stripe<T>>()
-        && ((bytes.as_ptr() as usize) & BITMASK_ALIGN_64) == 0
+    bytes.len() == size_of::<Stripe<T>>()
+        && is_aligned_at(bytes, STRIPE_ALIGNMENT)
 }
 
 pub fn from_bytes_mut<T>(bytes: &mut [u8]) -> &mut Stripe<T> {
