@@ -6,10 +6,7 @@ use std::{
 use rand::Rng;
 use structopt::StructOpt;
 
-use kobuta::{
-    schema::Column,
-    types::DataType,
-};
+use kobuta::{schema::Column, types::DataType};
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "basic")]

@@ -1,8 +1,6 @@
 use std::mem;
 
-use crate::{
-    stripe,
-};
+use crate::stripe;
 
 // Simple types
 pub type Int8 = i8;
@@ -96,7 +94,7 @@ impl DataType {
     }
 
     pub fn stripe<'b>(&self, bytes: &'b [u8]) -> stripe::Ref<'b> {
-        use crate::stripe::{Ref, from_bytes};
+        use crate::stripe::{from_bytes, Ref};
         match self {
             DataType::Int8 => Ref::Int8(from_bytes(bytes)),
             DataType::Int16 => Ref::Int16(from_bytes(bytes)),
@@ -120,7 +118,7 @@ impl DataType {
     }
 
     pub fn stripe_mut<'b>(&self, bytes: &'b mut [u8]) -> stripe::Mut<'b> {
-        use crate::stripe::{Mut, from_bytes_mut};
+        use crate::stripe::{from_bytes_mut, Mut};
         match self {
             DataType::Int8 => Mut::Int8(from_bytes_mut(bytes)),
             DataType::Int16 => Mut::Int16(from_bytes_mut(bytes)),
@@ -142,5 +140,4 @@ impl DataType {
             DataType::Text64 => Mut::Text64(from_bytes_mut(bytes)),
         }
     }
-
 }

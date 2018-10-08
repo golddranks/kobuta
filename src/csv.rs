@@ -1,17 +1,9 @@
 use std::{
     io::Read,
-    str::{FromStr, from_utf8},
-
+    str::{from_utf8, FromStr},
 };
 
-use crate::{
-    block,
-    schema,
-    errors::KbtError,
-    stripe::STRIPE_SIZE,
-    formats::Fmt,
-    types::*,
-};
+use crate::{block, errors::KbtError, formats::Fmt, schema, stripe::STRIPE_SIZE, types::*};
 
 struct Csv;
 
@@ -49,7 +41,6 @@ impl Fmt for Csv {
     }
 }
 
-
 pub fn to_kbt<'o>(
     reader: impl Read,
     schema: &[schema::Column],
@@ -85,8 +76,6 @@ pub fn to_kbt<'o>(
 
     Ok(&output[..blocknum * block_size])
 }
-
-
 
 pub fn from_block<'o>(
     block_buff: &[u8],
@@ -130,4 +119,13 @@ pub fn from_block<'o>(
     let (output, output_left) = output.split_at_mut(output_consumed);
 
     Ok((&*output, output_left))
+}
+
+pub enum InferResult<T> {
+    AlmostSure(T),
+    NotSure,
+}
+
+pub fn infer_headers(input: &[u8]) -> InferResult<bool> {
+    InferResult::NotSure // TODO implement inference
 }

@@ -4,17 +4,15 @@ use std::io::{ErrorKind as IoErrorKind, Read, Write};
 use std::mem;
 use std::slice;
 
-mod stripe;
 mod block;
-mod formats;
-pub mod types;
 pub mod csv;
-pub mod schema;
 pub mod errors;
+mod formats;
+pub mod schema;
+mod stripe;
+pub mod types;
 
-use crate::{
-    errors::KbtError,
-};
+use crate::errors::KbtError;
 
 // TODO unused at the moment
 /*

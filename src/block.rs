@@ -1,7 +1,4 @@
-use crate::{
-    schema,
-    stripe,
-};
+use crate::{schema, stripe};
 
 /// Returns a sized partition size in bytes
 pub fn calc_sized_partition_size(schema: &[schema::Column]) -> usize {
@@ -14,10 +11,7 @@ fn calc_val_offset(col: &schema::Column, row: u32) -> u32 {
     col.dtype.size() as u32 * row
 }
 
-pub fn partition<'b>(
-    mut block: &'b [u8],
-    schema: &[schema::Column],
-) -> Vec<stripe::Ref<'b>> {
+pub fn partition<'b>(mut block: &'b [u8], schema: &[schema::Column]) -> Vec<stripe::Ref<'b>> {
     let mut stripes = Vec::with_capacity(schema.len());
 
     for (col_i, col) in schema.iter().enumerate() {

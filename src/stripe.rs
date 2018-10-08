@@ -1,14 +1,8 @@
 use std::mem;
 
-use crate::{
-    types,
-    types::*,
-    schema,
-    errors::KbtError,
-    formats::Fmt,
-};
+use crate::{errors::KbtError, formats::Fmt, schema, types, types::*};
 
-const BITMASK_ALIGN_64: usize = ((1<<6)-1);
+const BITMASK_ALIGN_64: usize = ((1 << 6) - 1);
 pub const STRIPE_SIZE: usize = 64;
 
 /// Returns a stripe size in bytes
@@ -24,8 +18,8 @@ fn calc_offset(schema: &[schema::Column], col: u32) -> u32 {
 }
 
 fn slice_ok<T>(bytes: &[u8]) -> bool {
-    bytes.len() == mem::size_of::<Stripe<T>>() &&
-    ((bytes.as_ptr() as usize) & BITMASK_ALIGN_64) == 0
+    bytes.len() == mem::size_of::<Stripe<T>>()
+        && ((bytes.as_ptr() as usize) & BITMASK_ALIGN_64) == 0
 }
 
 pub fn from_bytes_mut<T>(bytes: &mut [u8]) -> &mut Stripe<T> {

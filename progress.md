@@ -43,3 +43,7 @@
 - Module split-up
 - Thinking about APIs and abstractions
 - Introduced a trait for parsing/printing values for different external formats
+
+# 8th Oct 2018 Refactoring (no stream; hoc: 2381)
+- Updated TODO to reflect the goals and prioritise the items
+- Refactored the binary commands

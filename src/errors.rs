@@ -1,8 +1,4 @@
-use std::{
-    fmt,
-    error::Error,
-};
-
+use std::{error::Error, fmt};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct KbtError;

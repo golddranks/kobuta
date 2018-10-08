@@ -1,7 +1,4 @@
-use crate::{
-    errors::KbtError,
-    types::*,
-};
+use crate::{errors::KbtError, types::*};
 
 pub trait Fmt {
     fn parse_int8(val: &[u8]) -> Result<Int8, KbtError>;

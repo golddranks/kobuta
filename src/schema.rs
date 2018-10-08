@@ -1,18 +1,10 @@
-
-use std::{
-    mem,
-    error::Error,
-    str::FromStr
-};
+use std::{error::Error, mem, str::FromStr};
 
 use log::{info, trace};
 
 use crate::{
     errors::KbtError,
-    types::{
-        DataType,
-        Data
-    },
+    types::{Data, DataType},
 };
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
